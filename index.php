@@ -24,6 +24,7 @@ $total       = count($incidencias);
 <head>
     <meta charset="utf-8">
     <title>Incidencias activas</title>
+    <link rel="stylesheet" href="css.css">
 </head>
 <body>
     <h1>Incidencias Activas<h1>
