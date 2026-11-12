@@ -53,26 +53,17 @@ $total       = count($incidencias);
                 <?php foreach ($incidencias as $inc): ?>
                     <tr>
                         <td><?= (int) $inc['id'] ?></td>
-
                         <td><?= htmlspecialchars($inc['titulo'], ENT_QUOTES, 'UTF-8') ?></td>
-
                         <td><?= htmlspecialchars($inc['descripcion'], ENT_QUOTES, 'UTF-8') ?></td>
-
                         <td><?= htmlspecialchars($inc['prioridad'], ENT_QUOTES, 'UTF-8') ?></td>
-
                         <td><?= htmlspecialchars($inc['estado'], ENT_QUOTES, 'UTF-8') ?></td>
-
                         <td><?= htmlspecialchars($inc['email_cliente'], ENT_QUOTES, 'UTF-8') ?></td>
-
                         <td>
                             <?= htmlspecialchars($inc['tecnico'] ?? 'Sin asignar', ENT_QUOTES, 'UTF-8') ?>
                         </td>
-
                         <td>
-                            <a href="editar_incidencia.php?id=<?= (int) $inc['id'] ?>">Editar</a>
-                            |
+                            <a href="editar_incidencia.php?id=<?= (int) $inc['id'] ?>">Editar</a>      |
                             <a href="asignar_incidencia.php?id=<?= (int) $inc['id'] ?>">Asignar</a>
-                            |
                             <a href="eliminar_incidencia.php?id=<?= (int) $inc['id'] ?>">Eliminar</a>
                         </td>
                     </tr>
