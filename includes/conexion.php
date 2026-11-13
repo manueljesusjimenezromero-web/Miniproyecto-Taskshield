@@ -1,6 +1,6 @@
 <?php
 
-    require_once __DIR__ . '/../config/config.php';
+    require_once __DIR__ . '/../config.php';
     try {
         $pdo = new PDO(DB_DSN, DB_USER, DB_PASS, [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,

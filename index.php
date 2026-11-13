@@ -2,22 +2,23 @@
 
 require_once __DIR__ . '/includes/conexion.php';
 
-$sql = 'SELECT i.id,
-               i.titulo,
-               i.descripcion,
-               i.prioridad,
-               i.estado,
-               i.email_cliente,
-               t.nombre AS tecnico
+
+$sql = 'SELECT i.*
+               ,t.nombre AS tecnico
           FROM incidencias i
           LEFT JOIN tecnicos t ON t.id = i.tecnico_id
          WHERE i.estado != :estado
-         ORDER BY FIELD(i.prioridad, "Alta", "Media", "Baja"), i.id DESC';
+         ORDER BY i.id ASC';
 
 $sentencia = $pdo->prepare($sql);
 $sentencia->execute([':estado' => 'Resuelta']);
 $incidencias = $sentencia->fetchAll(PDO::FETCH_ASSOC);
-$total       = count($incidencias);
+$total = count($incidencias);
+
+if ($total === 0) {
+    $pdo->exec("DELETE FROM incidencias");
+    $pdo->exec("ALTER TABLE incidencias AUTO_INCREMENT = 1");
+}   
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -31,8 +32,8 @@ $total       = count($incidencias);
     <p><a href="nueva_incidencia.php">+ Nueva incidencia</a><p>
     <p>Total de incidencias activas: <strong><?= $total ?></strong></p>
     
-    <?php if ($total === 0): ?>
-
+    <?php if ($total === 0):?>
+        
         <p>No hay incidencias activas en este momento.</p>
 
     <?php else: ?>
@@ -51,7 +52,8 @@ $total       = count($incidencias);
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($incidencias as $inc): ?>
+                <?php foreach ($incidencias as $inc):  ?>
+              
                     <tr>
                         <td><?= (int) $inc['id'] ?></td>
                         <td><?= htmlspecialchars($inc['titulo'], ENT_QUOTES, 'UTF-8') ?></td>
@@ -64,7 +66,7 @@ $total       = count($incidencias);
                         </td>
                         <td>
                             <a href="editar_incidencia.php?id=<?= (int) $inc['id'] ?>">Editar</a>      |
-                            <a href="asignar_incidencia.php?id=<?= (int) $inc['id'] ?>">Asignar</a>
+                            <a href="nueva_incidencia.php?id=<?= (int) $inc['id'] ?>">Asignar</a>
                             <a href="eliminar_incidencia.php?id=<?= (int) $inc['id'] ?>">Eliminar</a>
                         </td>
                     </tr>
