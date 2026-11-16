@@ -13,7 +13,7 @@ if (!$id) {
 }
 
 try {
-    // Verificar que el registro existe y recuperar sus datos actuales
+  
     $stmt = $pdo->prepare('select * from incidencias where id = :id');
     $stmt->execute([':id' => $id]);
     $incidencia = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -99,8 +99,9 @@ try {
         <p>
             <label for="prioridad">Prioridad:</label><br>
             <select name="prioridad" id="prioridad">
+                <?php $prioridadActual = $incidencia['prioridad'] ?: 'media'; ?>
                 <?php foreach ($prioridadesValidas as $opcion): ?>
-                    <option value="<?= $opcion ?>" <?= $opcion === $incidencia['prioridad'] ? 'selected' : '' ?>>
+                    <option value="<?= $opcion ?>" <?= $opcion === $prioridadActual ? 'selected' : '' ?>>
                         <?= $opcion ?>
                     </option>
                 <?php endforeach; ?>

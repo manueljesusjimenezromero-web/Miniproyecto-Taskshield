@@ -16,19 +16,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $pdo->beginTransaction();
 
+        // Averiguar que tecnico tenia asignado antes
+        $previo = $pdo->prepare('select tecnico_id 
+                                from incidencias 
+                                where id = :id');
+        $previo->execute([':id' => $idInc]);
+        $idTecAnterior = $previo->fetchColumn();
+
         // UPDATE 1: asignar el tecnico y cambiar el estado
         $a = $pdo->prepare('update incidencias
                                set tecnico_id = :tec,
                                    estado = :estado
                              where id = :id');
-        $a->execute([':tec' => $idTec, ':estado' => $estado, ':id' => $idInc]);
+        $a->execute([':tec' => $idTec,
+                     ':estado' => $estado,
+                     ':id' => $idInc]);
 
-        // UPDATE 2: incrementar el contador de tareas del tecnico
-        if ($idTec) {
-            $b = $pdo->prepare('update tecnicos
-                                   set tareas_activas = tareas_activas + 1
-                                 where id = :tec');
-            $b->execute([':tec' => $idTec]);
+        // Solo se tocan los contadores si el tecnico ha cambiado
+        if ($idTecAnterior != $idTec) {
+
+            // UPDATE 2: restar uno al tecnico que la tenia
+            if ($idTecAnterior) {
+                $b = $pdo->prepare('update tecnicos
+                                       set tareas_activas = tareas_activas - 1
+                                     where id = :tec');
+                $b->execute([':tec' => $idTecAnterior]);
+            }
+
+            // UPDATE 3: sumar uno al tecnico nuevo
+            if ($idTec) {
+                $c = $pdo->prepare('update tecnicos
+                                       set tareas_activas = tareas_activas + 1
+                                     where id = :tec');
+                $c->execute([':tec' => $idTec]);
+            }
         }
 
         $pdo->commit();
@@ -43,9 +64,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-// ---------------------------------------------------------------
-// Listado
-// ---------------------------------------------------------------
 $sql = 'select i.*, t.nombre as tecnico
           from incidencias i
           left join tecnicos t on t.id = i.tecnico_id
