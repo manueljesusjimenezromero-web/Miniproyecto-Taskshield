@@ -2,24 +2,65 @@
 
 require_once __DIR__ . '/includes/conexion.php';
 
-$sql = 'SELECT i.*
-               ,t.nombre AS tecnico
-          FROM incidencias i
-          LEFT JOIN tecnicos t ON t.id = i.tecnico_id
-         ORDER BY i.id ASC';
+// ---------------------------------------------------------------
+// Punto 4: asignacion avanzada con transaccion
+// ---------------------------------------------------------------
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    $idInc  = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
+    $idTec  = filter_input(INPUT_POST, 'tecnico_id', FILTER_VALIDATE_INT) ?: null;
+    $estado = $idTec ? 'en proceso' : 'pendiente';
+
+    if (!$idInc) {
+        die('Identificador de incidencia no valido.');
+    }
+
+    try {
+        $pdo->beginTransaction();
+
+        // UPDATE 1: asignar el tecnico y cambiar el estado
+        $a = $pdo->prepare('update incidencias
+                               set tecnico_id = :tec,
+                                   estado = :estado
+                             where id = :id');
+        $a->execute([':tec' => $idTec, ':estado' => $estado, ':id' => $idInc]);
+
+        // UPDATE 2: incrementar el contador de tareas del tecnico
+        if ($idTec) {
+            $b = $pdo->prepare('update tecnicos
+                                   set tareas_activas = tareas_activas + 1
+                                 where id = :tec');
+            $b->execute([':tec' => $idTec]);
+        }
+
+        $pdo->commit();
+
+    } catch (PDOException $e) {
+        $pdo->rollBack();
+        error_log($e->getMessage());
+        die('Error al asignar la incidencia. No se ha guardado ningun cambio.');
+    }
+
+    header('Location: index.php');
+    exit;
+}
+
+// ---------------------------------------------------------------
+// Listado
+// ---------------------------------------------------------------
+$sql = 'select i.*, t.nombre as tecnico
+          from incidencias i
+          left join tecnicos t on t.id = i.tecnico_id
+         order by i.id asc';
 
 $sentencia = $pdo->prepare($sql);
 $sentencia->execute();
 $incidencias = $sentencia->fetchAll(PDO::FETCH_ASSOC);
 $total = count($incidencias);
 
-$tec=$pdo->prepare('SELECT nombre FROM tecnicos');
+$tec = $pdo->prepare('select id, nombre from tecnicos order by nombre asc');
 $tec->execute();
 $tecnicos = $tec->fetchAll(PDO::FETCH_ASSOC);
-if ($total === 0) {
-    $pdo->exec("DELETE FROM incidencias");
-    $pdo->exec("ALTER TABLE incidencias AUTO_INCREMENT = 1");
-}   
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -29,32 +70,33 @@ if ($total === 0) {
     <link rel="stylesheet" href="css.css">
 </head>
 <body>
-    <h1>Incidencias Activas<h1>
-    <p><a href="nueva_incidencia.php">+ Nueva incidencia</a><p>
-    <p>Total de incidencias activas: <strong><?= $total ?></strong></p>
-    
-    <?php if ($total === 0):?>
-        
-        <p>No hay incidencias activas en este momento.</p>
+    <h1>Incidencias Activas</h1>
+
+    <p><a href="nueva_incidencia.php">+ Nueva incidencia</a></p>
+
+    <p>Total de incidencias: <strong><?= $total ?></strong></p>
+
+    <?php if ($total === 0): ?>
+
+        <p>No hay incidencias en este momento.</p>
 
     <?php else: ?>
 
-        <table border="1" cellpadding="6" cellspacing="0">
+        <table>
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Título</th>
-                    <th>Descripción</th>
+                    <th>Titulo</th>
+                    <th>Descripcion</th>
                     <th>Prioridad</th>
                     <th>Estado</th>
                     <th>Cliente</th>
-                    <th>Técnico</th>
+                    <th>Tecnico</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($incidencias as $inc):  ?>
-              
+                <?php foreach ($incidencias as $inc): ?>
                     <tr>
                         <td><?= (int) $inc['id'] ?></td>
                         <td><?= htmlspecialchars($inc['titulo'], ENT_QUOTES, 'UTF-8') ?></td>
@@ -63,17 +105,21 @@ if ($total === 0) {
                         <td><?= htmlspecialchars($inc['estado'], ENT_QUOTES, 'UTF-8') ?></td>
                         <td><?= htmlspecialchars($inc['email_cliente'], ENT_QUOTES, 'UTF-8') ?></td>
                         <td>
-                            <select name="tecnico_id" id="tecnico_id">
-                                <option value="">sin asignar</option>
-                                <?php foreach ($tecnicos as $tecnico): ?>
-                                    <option>
-                                        <?= htmlspecialchars($tecnico['nombre'], ENT_QUOTES, 'UTF-8') ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
+                            <form method="post" action="index.php">
+                                <input type="hidden" name="id" value="<?= (int) $inc['id'] ?>">
+                                <select name="tecnico_id" onchange="this.form.submit()">
+                                    <option value="">sin asignar</option>
+                                    <?php foreach ($tecnicos as $tecnico): ?>
+                                        <option value="<?= (int) $tecnico['id'] ?>"
+                                            <?= $tecnico['id'] == $inc['tecnico_id'] ? 'selected' : '' ?>>
+                                            <?= htmlspecialchars($tecnico['nombre'], ENT_QUOTES, 'UTF-8') ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </form>
                         </td>
                         <td>
-                            <a class="editar" href="editar_incidencia.php?id=<?= (int) $inc['id'] ?>">Editar</a>      |
+                            <a class="editar" href="editar_incidencia.php?id=<?= (int) $inc['id'] ?>">Editar</a>
                             <a class="eliminar" href="eliminar_incidencia.php?id=<?= (int) $inc['id'] ?>">Eliminar</a>
                         </td>
                     </tr>
@@ -85,5 +131,3 @@ if ($total === 0) {
 
 </body>
 </html>
-</body>
-<html>
