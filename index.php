@@ -12,6 +12,7 @@ $sentencia = $pdo->prepare($sql);
 $sentencia->execute();
 $incidencias = $sentencia->fetchAll(PDO::FETCH_ASSOC);
 $total = count($incidencias);
+
 $tec=$pdo->prepare('SELECT nombre FROM tecnicos');
 $tec->execute();
 $tecnicos = $tec->fetchAll(PDO::FETCH_ASSOC);
@@ -62,7 +63,6 @@ if ($total === 0) {
                         <td><?= htmlspecialchars($inc['estado'], ENT_QUOTES, 'UTF-8') ?></td>
                         <td><?= htmlspecialchars($inc['email_cliente'], ENT_QUOTES, 'UTF-8') ?></td>
                         <td>
-                            <?= htmlspecialchars($inc['tecnico'] ?? 'select', ENT_QUOTES, 'UTF-8') ?>
                             <select name="tecnico_id" id="tecnico_id">
                                 <option value="">sin asignar</option>
                                 <?php foreach ($tecnicos as $tecnico): ?>
