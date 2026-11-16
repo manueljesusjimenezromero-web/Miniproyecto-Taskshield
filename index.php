@@ -7,11 +7,10 @@ $sql = 'SELECT i.*
                ,t.nombre AS tecnico
           FROM incidencias i
           LEFT JOIN tecnicos t ON t.id = i.tecnico_id
-         WHERE i.estado != :estado
          ORDER BY i.id ASC';
 
 $sentencia = $pdo->prepare($sql);
-$sentencia->execute([':estado' => 'Resuelta']);
+$sentencia->execute();
 $incidencias = $sentencia->fetchAll(PDO::FETCH_ASSOC);
 $total = count($incidencias);
 
@@ -66,7 +65,6 @@ if ($total === 0) {
                         </td>
                         <td>
                             <a class="editar" href="editar_incidencia.php?id=<?= (int) $inc['id'] ?>">Editar</a>      |
-                            <a class="asignar" href="nueva_incidencia.php?id=<?= (int) $inc['id'] ?>">Asignar</a>
                             <a class="eliminar" href="eliminar_incidencia.php?id=<?= (int) $inc['id'] ?>">Eliminar</a>
                         </td>
                     </tr>
