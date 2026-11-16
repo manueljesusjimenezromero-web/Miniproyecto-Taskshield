@@ -29,6 +29,14 @@ insert into tecnicos (nombre, email, tareas_activas) values
     ('marta rubio', 'marta.rubio@empresa.local', 0),
     ('morton rubio', 'morton.rubio@empresa.local', 0);
 
-create user 'app_user'@'localhost' identified by 'titozeio';
-grant select, insert, update, delete on taskshield.* to 'app_user'@'localhost';
-flush privileges;
+insert into incidencias (titulo, descripcion, prioridad, estado, email_cliente, tecnico_id) values
+    ('impresora de planta 2 sin red', 'la impresora no aparece entre los dispositivos de red.', 'alta', 'pendiente', 'recepcion@cliente.local', null),
+    ('portatil lento al arrancar', 'el equipo tarda mas de cinco minutos en llegar al escritorio.', 'media', 'pendiente', 'jlopez@cliente.local', null),
+    ('alta de cuenta de correo', 'crear la cuenta de la nueva incorporacion de ventas.', 'baja', 'en proceso', 'rrhh@cliente.local', 2),
+    ('monitor secundario sin senal', 'el segundo monitor dejo de detectarse.', 'media', 'resuelta', 'soporte@cliente.local', 3);
+
+update tecnicos t set t.tareas_activas = (
+    select count(*) from incidencias i where i.tecnico_id = t.id and i.estado <> 'resuelta'
+);
+
+
