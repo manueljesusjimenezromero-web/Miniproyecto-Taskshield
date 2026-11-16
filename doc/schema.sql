@@ -26,7 +26,8 @@ create table incidencias (
 insert into tecnicos (nombre, email, tareas_activas) values
     ('ana torres', 'ana.torres@empresa.local', 0),
     ('luis moreno', 'luis.moreno@empresa.local', 0),
-    ('marta rubio', 'marta.rubio@empresa.local', 0);
+    ('marta rubio', 'marta.rubio@empresa.local', 0),
+    ('morton rubio', 'morton.rubio@empresa.local', 0);
 
 create user 'app_user'@'localhost' identified by 'titozeio';
 grant select, insert, update, delete on taskshield.* to 'app_user'@'localhost';

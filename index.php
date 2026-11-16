@@ -2,7 +2,6 @@
 
 require_once __DIR__ . '/includes/conexion.php';
 
-
 $sql = 'SELECT i.*
                ,t.nombre AS tecnico
           FROM incidencias i
@@ -13,7 +12,9 @@ $sentencia = $pdo->prepare($sql);
 $sentencia->execute();
 $incidencias = $sentencia->fetchAll(PDO::FETCH_ASSOC);
 $total = count($incidencias);
-
+$tec=$pdo->prepare('SELECT nombre FROM tecnicos');
+$tec->execute();
+$tecnicos = $tec->fetchAll(PDO::FETCH_ASSOC);
 if ($total === 0) {
     $pdo->exec("DELETE FROM incidencias");
     $pdo->exec("ALTER TABLE incidencias AUTO_INCREMENT = 1");
@@ -61,7 +62,15 @@ if ($total === 0) {
                         <td><?= htmlspecialchars($inc['estado'], ENT_QUOTES, 'UTF-8') ?></td>
                         <td><?= htmlspecialchars($inc['email_cliente'], ENT_QUOTES, 'UTF-8') ?></td>
                         <td>
-                            <?= htmlspecialchars($inc['tecnico'] ?? 'Sin asignar', ENT_QUOTES, 'UTF-8') ?>
+                            <?= htmlspecialchars($inc['tecnico'] ?? 'select', ENT_QUOTES, 'UTF-8') ?>
+                            <select name="tecnico_id" id="tecnico_id">
+                                <option value="">sin asignar</option>
+                                <?php foreach ($tecnicos as $tecnico): ?>
+                                    <option>
+                                        <?= htmlspecialchars($tecnico['nombre'], ENT_QUOTES, 'UTF-8') ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
                         </td>
                         <td>
                             <a class="editar" href="editar_incidencia.php?id=<?= (int) $inc['id'] ?>">Editar</a>      |
