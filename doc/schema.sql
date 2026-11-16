@@ -28,6 +28,6 @@ insert into tecnicos (nombre, email, tareas_activas) values
     ('luis moreno', 'luis.moreno@empresa.local', 0),
     ('marta rubio', 'marta.rubio@empresa.local', 0);
 
-create user 'app_user'@'localhost' identified by 'cambia_esta_contrasena';
+create user 'app_user'@'localhost' identified by 'titozeio';
 grant select, insert, update, delete on taskshield.* to 'app_user'@'localhost';
 flush privileges;

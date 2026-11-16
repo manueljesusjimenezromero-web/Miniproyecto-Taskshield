@@ -65,9 +65,9 @@ if ($total === 0) {
                             <?= htmlspecialchars($inc['tecnico'] ?? 'Sin asignar', ENT_QUOTES, 'UTF-8') ?>
                         </td>
                         <td>
-                            <a href="editar_incidencia.php?id=<?= (int) $inc['id'] ?>">Editar</a>      |
-                            <a href="nueva_incidencia.php?id=<?= (int) $inc['id'] ?>">Asignar</a>
-                            <a href="eliminar_incidencia.php?id=<?= (int) $inc['id'] ?>">Eliminar</a>
+                            <a class="editar" href="editar_incidencia.php?id=<?= (int) $inc['id'] ?>">Editar</a>      |
+                            <a class="asignar" href="nueva_incidencia.php?id=<?= (int) $inc['id'] ?>">Asignar</a>
+                            <a class="eliminar" href="eliminar_incidencia.php?id=<?= (int) $inc['id'] ?>">Eliminar</a>
                         </td>
                     </tr>
                 <?php endforeach; ?>
