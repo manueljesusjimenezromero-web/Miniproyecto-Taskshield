@@ -5,6 +5,7 @@ $prioridadesValidas = ['alta', 'media', 'baja'];
 $estadosValidos     = ['pendiente', 'en proceso', 'resuelta'];
 $mensaje = '';
 
+// El id llega por la url cuando abro la pagina y por el campo oculto al guardar
 $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT)
    ?: filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 
@@ -14,10 +15,12 @@ if (!$id) {
 
 try {
   
+    // Antes de nada compruebo que esa incidencia existe de verdad
     $stmt = $pdo->prepare('select * from incidencias where id = :id');
     $stmt->execute([':id' => $id]);
     $incidencia = $stmt->fetch(PDO::FETCH_ASSOC);
 
+    // Si fetch no devuelve nada es que me han pasado un id inventado
     if (!$incidencia) {
         die('No existe ninguna incidencia con ese identificador.');
     }
@@ -54,10 +57,13 @@ try {
                 ':id'            => $id,
             ]);
 
+            // rowCount me dice cuantas filas han cambiado de verdad
+            // Si da cero no es un error, es que no has modificado nada
             $mensaje = $actualizar->rowCount() > 0
                 ? 'Incidencia actualizada correctamente.'
                 : 'No se modificó ninguna fila: no has cambiado nada.';
 
+            // Refresco el array para que el formulario muestre lo recien guardado
             $incidencia['titulo']        = $titulo;
             $incidencia['descripcion']   = $descripcion;
             $incidencia['prioridad']     = $prioridad;
@@ -101,7 +107,7 @@ try {
             <select name="prioridad" id="prioridad">
                 <?php $prioridadActual = $incidencia['prioridad'] ?: 'media'; ?>
                 <?php foreach ($prioridadesValidas as $opcion): ?>
-                    <option value="<?= $opcion ?>" <?= $opcion === $prioridadActual ? 'selected' : '' ?>>
+                    <option value="<?= $opcion ?>" <?= strcasecmp($opcion, $prioridadActual) === 0 ? 'selected' : '' ?>>
                         <?= $opcion ?>
                     </option>
                 <?php endforeach; ?>
@@ -116,7 +122,7 @@ try {
             <label for="estado">Estado:</label><br>
             <select name="estado" id="estado">
                 <?php foreach ($estadosValidos as $opcion): ?>
-                    <option value="<?= $opcion ?>" <?= $opcion === $incidencia['estado'] ? 'selected' : '' ?>>
+                    <option value="<?= $opcion ?>" <?= strcasecmp($opcion, $incidencia['estado']) === 0 ? 'selected' : '' ?>>
                         <?= $opcion ?>
                     </option>
                 <?php endforeach; ?>

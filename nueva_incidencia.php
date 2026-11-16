@@ -4,15 +4,20 @@ require_once __DIR__ . '/includes/conexion.php';
 $prioridadesValidas = ['alta', 'media', 'baja'];
 $mensaje = '';
 
+// Esta pagina hace dos cosas: si entras normal te enseña el formulario
+// y si llega un POST es que lo has enviado, asi que lo proceso
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
+    // filter_input lee y limpia de una sola vez, sin tocar $_POST directamente
     $titulo        = filter_input(INPUT_POST, 'titulo', FILTER_SANITIZE_SPECIAL_CHARS);
     $descripcion   = filter_input(INPUT_POST, 'descripcion', FILTER_SANITIZE_SPECIAL_CHARS);
     $prioridad     = filter_input(INPUT_POST, 'prioridad', FILTER_SANITIZE_SPECIAL_CHARS);
     $email_cliente = filter_input(INPUT_POST, 'email_cliente', FILTER_VALIDATE_EMAIL);
 
+    // Si el correo esta mal escrito el filtro devuelve false y no sigo
     if (!$titulo || !$descripcion || !$email_cliente) {
         $mensaje = 'Todos los campos son obligatorios y el email debe ser válido.';
+    // Compruebo la prioridad contra mi lista para que no llegue nada raro
     } elseif (!in_array($prioridad, $prioridadesValidas, true)) {
         $mensaje = 'La prioridad recibida no es válida.';
     } else {
@@ -29,8 +34,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':email_cliente' => $email_cliente,
             ]);
 
+            // Me guardo el id que acaba de generar la base de datos
             $nuevoId = $pdo->lastInsertId();
 
+            // Y con ese id mando al usuario directo a la incidencia creada
             header('Location: editar_incidencia.php?id=' . $nuevoId);
             exit;
 

@@ -11,6 +11,7 @@ if (!$id) {
 $mensaje = '';
 
 try {
+    // Busco la incidencia para comprobar que existe y poder enseñar su titulo
     $stmt = $pdo->prepare('select id, titulo from incidencias where id = :id');
     $stmt->execute([':id' => $id]);
     $incidencia = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -19,10 +20,13 @@ try {
         die('No existe ninguna incidencia con ese identificador.');
     }
 
+    // El borrado solo ocurre cuando el usuario confirma desde el formulario
+    // Entrando por la url solo se ve la pregunta, nunca se borra nada
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $borrar = $pdo->prepare('delete from incidencias where id = :id');
         $borrar->execute([':id' => $id]);
 
+        // Con rowCount me aseguro de que se ha borrado algo
         $mensaje = $borrar->rowCount() > 0
             ? 'Incidencia eliminada correctamente.'
             : 'No se eliminó ninguna fila.';

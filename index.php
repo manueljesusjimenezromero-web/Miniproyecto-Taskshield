@@ -3,10 +3,14 @@
 require_once __DIR__ . '/includes/conexion.php';
 
 
+// Si llega un POST es que alguien ha tocado el desplegable de tecnicos
+// Lo proceso aqui arriba porque luego uso header y no puede haber salida antes
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
+    // Filtro los dos id para asegurarme de que son numeros
     $idInc  = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
     $idTec  = filter_input(INPUT_POST, 'tecnico_id', FILTER_VALIDATE_INT) ?: null;
+    // Si hay tecnico la incidencia pasa a en proceso, si no vuelve a pendiente
     $estado = $idTec ? 'en proceso' : 'pendiente';
 
     if (!$idInc) {
@@ -14,6 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     try {
+        // Abro la transaccion, hasta el commit no se guarda nada de verdad
         $pdo->beginTransaction();
 
         // Averiguar que tecnico tenia asignado antes
@@ -52,18 +57,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
+        // Si he llegado hasta aqui sin errores, confirmo los cambios
         $pdo->commit();
 
     } catch (PDOException $e) {
+        // Algo ha fallado, asi que deshago todo y dejo la base como estaba
         $pdo->rollBack();
         error_log($e->getMessage());
         die('Error al asignar la incidencia. No se ha guardado ningun cambio.');
     }
 
+    // Recargo la pagina para que al refrescar no se repita la asignacion
     header('Location: index.php');
     exit;
 }
 
+// Saco las incidencias junto al nombre del tecnico
+// Uso left join porque una incidencia puede no tener tecnico todavia
 $sql = 'select i.*, t.nombre as tecnico
           from incidencias i
           left join tecnicos t on t.id = i.tecnico_id
@@ -74,6 +84,7 @@ $sentencia->execute();
 $incidencias = $sentencia->fetchAll(PDO::FETCH_ASSOC);
 $total = count($incidencias);
 
+// Y aparte la lista de tecnicos para rellenar el desplegable de cada fila
 $tec = $pdo->prepare('select id, nombre from tecnicos order by nombre asc');
 $tec->execute();
 $tecnicos = $tec->fetchAll(PDO::FETCH_ASSOC);
