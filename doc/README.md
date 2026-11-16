@@ -3,6 +3,28 @@
 Intranet de gestion de incidencias para un departamento de soporte informatico.
 Permite registrar averias, consultarlas, editarlas, asignarlas a un tecnico y eliminarlas.
 
+## Metodologia de trabajo
+
+El proyecto se ha desarrollado en pareja aplicando *pair programming*, alternando
+los dos roles clasicos:
+
+- **Driver**: es quien tiene el teclado y escribe el codigo. Se centra en el
+  detalle inmediato, en la sintaxis y en que lo que esta escribiendo funcione.
+- **Navigator**: no escribe. Revisa en voz alta lo que hace el driver, piensa en
+  la estructura general, detecta errores antes de que se ejecuten y va anticipando
+  el siguiente paso.
+
+Los roles se han ido intercambiando a lo largo de la practica, de forma que los
+dos integrantes han pasado por ambas posiciones y conocen todo el codigo
+entregado. La ventaja principal ha sido detectar fallos en el momento (rutas mal
+construidas, valores que no coincidian con los `enum` de la base de datos,
+consultas sin `where`) en lugar de descubrirlos despues al probar.
+
+**Integrantes:**
+
+- Manuel Jesus Jimenez Romero
+- (nombre del companero)
+
 ## Arquitectura
 
 ```
