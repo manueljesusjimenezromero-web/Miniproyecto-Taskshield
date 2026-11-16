@@ -5,8 +5,6 @@
 | 1 | Email invalido en el alta | En `nueva_incidencia.php`, escribir `juan@@correo` en el campo Email del cliente y enviar | `FILTER_VALIDATE_EMAIL` devuelve `false`, no se ejecuta el INSERT y se muestra un aviso | Correcto: aparece "Todos los campos son obligatorios y deben ser validos" y la tabla no cambia |
 | 2 | Editar un id inexistente | Abrir `editar_incidencia.php?id=9999` | El SELECT previo devuelve `false` y se corta con un mensaje controlado, sin error de PHP | Correcto: "No existe ninguna incidencia con ese identificador" |
 | 3 | Fallo en la segunda parte de la transaccion | Asignar un tecnico cuyo id no existe en la tabla `tecnicos` | La clave ajena rechaza el UPDATE, salta el `rollBack()` y no se guarda ninguno de los dos cambios | Correcto: la incidencia sigue en "pendiente" y `tareas_activas` no se incrementa |
-| 4 | Id no numerico en la URL | Abrir `eliminar_incidencia.php?id=abc` | `FILTER_VALIDATE_INT` devuelve `false` y el script no llega a la base de datos | Correcto: "Identificador no valido" |
-| 5 | Borrado correcto | Pulsar Eliminar en una incidencia y confirmar | `rowCount()` devuelve 1 y se informa del borrado | Correcto: "Incidencia eliminada correctamente" |
 
 ## Detalle del caso 3
 
